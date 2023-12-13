@@ -3,7 +3,7 @@ FROM node:10-alpine
 WORKDIR /app   #Questo comando crea una cartella chiamata app all’interno del container. Questa cartella sarà quella in cui verranno copiati tutti i file del progetto (vedi comando copy)
 COPY . .   #Copy riceve due parametri: Da quale percorso copiare (in locale)  e in quale percorso copiare (nel container). Quindi [Copy . .] copia tutti i file dalla cartella in cui si trova il Dockerfile (./) all’interno del percorso ./ all’interno della working directory del container
 RUN yarn install --production
-CMD ["node", "/app/src/index.js"]   #Il comando “node” verrà eseguito dalla root directory del container. Per raggiungere il file index.js è quindi necessario entrare nella working directory
+CMD ["node", "/app/src/index.js"]   #The main purpose of a CMD is to provide defaults for an executing container               Il comando “node” verrà eseguito dalla root directory del container. Per raggiungere il file index.js è quindi necessario entrare nella working directory
 
 
 docker ps   #per vedere tutti i container attivi
