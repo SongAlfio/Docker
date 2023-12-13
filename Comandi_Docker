@@ -34,3 +34,15 @@ docker logs -f <container-id>   #per guardare il log dei container
 Invece di: {submitting ? 'Adding...' : 'Add Item'}
 Mettere: {submitting ? 'Adding...' : 'Add'}   #poi il bottone di submit diventa da 'Add Item' ad 'Add'
 
+docker network create todo-app   #serve per creare una nuova rete per i container(ci serve per farsi parlare tra di loro)
+
+docker run -d \   #avvia il container mysql e generare dei variabili dell'ambiente 
+    --network todo-app --network-alias mysql \
+    -v todo-mysql-data:/var/lib/mysql \
+    -e MYSQL_ROOT_PASSWORD=secret \
+    -e MYSQL_DATABASE=todos \
+    mysql:5.7
+
+docker exec -it <mysql-container-id> mysql -u root -p   #collegare ad mysql
+
+ docker run -it --network todo-app nicolaka/netshoot   #usa l'immagine nicolaka / netshoot per creare un nuovo container 
