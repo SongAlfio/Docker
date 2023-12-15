@@ -1,5 +1,5 @@
 #Dentro il Dockerfile:
-FROM node:10-alpine
+FROM node:10-alpine   #specifica l'immagine di base da utilizzare 
 WORKDIR /app   #Questo comando crea una cartella chiamata app all’interno del container. Questa cartella sarà quella in cui verranno copiati tutti i file del progetto (vedi comando copy)
 COPY . .   #Copy riceve due parametri: Da quale percorso copiare (in locale)  e in quale percorso copiare (nel container). Quindi [Copy . .] copia tutti i file dalla cartella in cui si trova il Dockerfile (./) all’interno del percorso ./ all’interno della working directory del container
 RUN yarn install --production
@@ -46,4 +46,74 @@ docker run -d \   #avvia il container mysql e generare dei variabili dell'ambien
 
 docker exec -it <mysql-container-id> mysql -u root -p   #collegare ad mysql
 
- docker run -it --network todo-app nicolaka/netshoot   #usa l'immagine nicolaka / netshoot per creare un nuovo container 
+docker run -it --network todo-app nicolaka/netshoot   #usa l'immagine nicolaka / netshoot per creare un nuovo container 
+
+docker-compose version   #per vedere la versione del docker-compose
+
+#definire l'app service      
+docker run -dp 3000:3000 \
+  -w /app -v $PWD:/app \
+  --network todo-app \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD=secret \
+  -e MYSQL_DB=todos \
+  node:10-alpine \
+  sh -c "yarn install && yarn run dev"
+
+
+version: "3.7"
+services:
+  app:
+    image: node:10-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: todos
+
+#Definire il mysqsl service
+docker run -d \
+  --network todo-app --network-alias mysql \
+  -v todo-mysql-data:/var/lib/mysql \
+  -e MYSQL_ROOT_PASSWORD=secret \
+  -e MYSQL_DATABASE=todos \
+  mysql:5.7
+
+
+version: "3.7"
+services:
+  app:
+    image: node:10-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: todos
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: todos
+
+volumes:
+  todo-mysql-data:
+
+
+
+docker-compose up -d   #serve ad avviare l'applicazione stack
